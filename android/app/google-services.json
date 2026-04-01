@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "107616380311",
+    "firebase_url": "https://homeease-16dfd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "homeease-16dfd",
+    "storage_bucket": "homeease-16dfd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:107616380311:android:48e93d9d001e6a5db350d2",
+        "android_client_info": {
+          "package_name": "com.example.homeease"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBGyxooz2ddHBb2Znt-3aI8VTKn1-Vt920"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
