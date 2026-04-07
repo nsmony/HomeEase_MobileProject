@@ -29,9 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    if (_nameCtrl.text.trim().isEmpty ||
-        _emailCtrl.text.trim().isEmpty ||
-        _passCtrl.text.isEmpty) {
+    if (_nameCtrl.text.trim().isEmpty || _emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
       setState(() => _error = 'Please fill in all fields.');
       return;
     }
@@ -41,12 +39,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
     setState(() { _loading = true; _error = null; });
     try {
-      await _auth.register(
-        _nameCtrl.text.trim(),
-        _emailCtrl.text.trim(),
-        _passCtrl.text,
-      );
-      // AuthGate handles navigation automatically
+      await _auth.register(_nameCtrl.text.trim(), _emailCtrl.text.trim(), _passCtrl.text);
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _auth.getErrorMessage(e.code));
     } finally {
@@ -56,13 +49,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, size: 18),
+          icon: Icon(Icons.arrow_back_ios, size: 18, color: colors.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -72,134 +66,121 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Create account',
-                  style: TextStyle(
-                      fontSize: 22, fontWeight: FontWeight.w700)),
+              Text('Create account', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: colors.onSurface)),
               const SizedBox(height: 4),
-              Text('Join HomeEase today',
-                  style:
-                  TextStyle(fontSize: 14, color: Colors.grey.shade500)),
+              Text('Join HomeEase today', style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant)),
 
               const SizedBox(height: 32),
 
-              // Name
-              TextField(
+              _buildTextField(
                 controller: _nameCtrl,
-                decoration: InputDecoration(
-                  labelText: 'Full name',
-                  prefixIcon: const Icon(Icons.person_outline),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
+                label: 'Full name',
+                icon: Icons.person_outline,
+                colors: colors,
+                isDark: isDark,
               ),
               const SizedBox(height: 16),
 
-              // Email
-              TextField(
+              _buildTextField(
                 controller: _emailCtrl,
+                label: 'Email',
+                icon: Icons.email_outlined,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  prefixIcon: const Icon(Icons.email_outlined),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
+                colors: colors,
+                isDark: isDark,
               ),
               const SizedBox(height: 16),
 
-              // Password
-              TextField(
+              _buildTextField(
                 controller: _passCtrl,
+                label: 'Password',
+                icon: Icons.lock_outline,
                 obscureText: _obscurePass,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(_obscurePass
-                        ? Icons.visibility_off_outlined
-                        : Icons.visibility_outlined),
-                    onPressed: () =>
-                        setState(() => _obscurePass = !_obscurePass),
-                  ),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
+                colors: colors,
+                isDark: isDark,
+                suffixIcon: IconButton(
+                  icon: Icon(_obscurePass ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: colors.onSurfaceVariant),
+                  onPressed: () => setState(() => _obscurePass = !_obscurePass),
                 ),
               ),
               const SizedBox(height: 16),
 
-              // Confirm password
-              TextField(
+              _buildTextField(
                 controller: _confirmCtrl,
+                label: 'Confirm password',
+                icon: Icons.lock_outline,
                 obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm password',
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
-                  filled: true,
-                  fillColor: Colors.grey.shade50,
-                ),
+                colors: colors,
+                isDark: isDark,
               ),
 
-              // Error
               if (_error != null) ...[
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: Colors.red.shade50,
+                    color: isDark ? Colors.red.withOpacity(0.2) : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: Colors.red.shade200),
+                    border: Border.all(color: isDark ? Colors.red.shade800 : Colors.red.shade200),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline,
-                          color: Colors.red.shade400, size: 16),
+                      Icon(Icons.error_outline, color: Colors.red.shade400, size: 16),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(_error!,
-                            style: TextStyle(
-                                color: Colors.red.shade700, fontSize: 13)),
+                        child: Text(_error!, style: TextStyle(color: isDark ? Colors.red.shade200 : Colors.red.shade700, fontSize: 13)),
                       ),
                     ],
                   ),
                 ),
               ],
 
-              const SizedBox(height: 24),
+              const SizedBox(height: 32),
 
-              // Register button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _loading ? null : _register,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal.shade600,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.onPrimary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: _loading
-                      ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                          color: Colors.white, strokeWidth: 2))
-                      : const Text('Create Account',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: colors.onPrimary, strokeWidth: 2))
+                      : const Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    required ColorScheme colors,
+    required bool isDark,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    Widget? suffixIcon,
+  }) {
+    return TextField(
+      controller: controller,
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      style: TextStyle(color: colors.onSurface),
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon, color: colors.onSurfaceVariant),
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        filled: true,
+        fillColor: isDark ? colors.surface : Colors.grey.shade100,
       ),
     );
   }

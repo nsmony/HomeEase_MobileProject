@@ -2,29 +2,40 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import '../widgets/fade_animator.dart';
 
 class DevicesScreen extends StatelessWidget {
   final String roomId;
   final String roomName;
-  const DevicesScreen(
-      {super.key, required this.roomId, required this.roomName});
+  const DevicesScreen({super.key, required this.roomId, required this.roomName});
 
   String get _uid => FirebaseAuth.instance.currentUser!.uid;
-  CollectionReference get _devices => FirebaseFirestore.instance
-      .collection('users/$_uid/rooms/$roomId/devices');
+  CollectionReference get _devices => FirebaseFirestore.instance.collection('users/$_uid/rooms/$roomId/devices');
+
+  BoxDecoration _cardDecoration(BuildContext context, {Color? customColor}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return BoxDecoration(
+      color: customColor ?? Theme.of(context).colorScheme.surface,
+      borderRadius: BorderRadius.circular(16),
+      border: isDark ? Border.all(color: Colors.white12) : null,
+      boxShadow: isDark ? [] : [
+        BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+      ],
+    );
+  }
 
   Future<void> _addDevice(BuildContext context) async {
     final nameCtrl = TextEditingController();
     final deviceIdCtrl = TextEditingController();
     String selectedType = 'relay';
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-      ),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => Padding(
           padding: EdgeInsets.only(
@@ -35,47 +46,38 @@ class DevicesScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Add a device',
-                  style: TextStyle(
-                      fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Add a device', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.onSurface)),
               const SizedBox(height: 16),
               TextField(
                 controller: nameCtrl,
                 autofocus: true,
+                style: TextStyle(color: colors.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Device name',
-                  prefixIcon: const Icon(Icons.devices_outlined),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.devices_outlined, color: colors.onSurfaceVariant),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: isDark ? colors.surface : Colors.grey.shade100,
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: deviceIdCtrl,
+                style: TextStyle(color: colors.onSurface),
                 decoration: InputDecoration(
                   labelText: 'Device ID (e.g. ESP32-A1B2)',
-                  prefixIcon: const Icon(Icons.qr_code),
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: Icon(Icons.qr_code, color: colors.onSurfaceVariant),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   filled: true,
-                  fillColor: Colors.grey.shade50,
+                  fillColor: isDark ? colors.surface : Colors.grey.shade100,
                 ),
               ),
               const SizedBox(height: 12),
-              // Type selector
               Row(
                 children: [
-                  _typeChip('Relay', 'relay', selectedType,
-                      Icons.toggle_on_outlined, (v) {
-                        setState(() => selectedType = v);
-                      }),
+                  _typeChip(context, 'Relay', 'relay', selectedType, Icons.toggle_on_outlined, (v) => setState(() => selectedType = v)),
                   const SizedBox(width: 8),
-                  _typeChip('Sensor', 'sensor', selectedType,
-                      Icons.sensors, (v) {
-                        setState(() => selectedType = v);
-                      }),
+                  _typeChip(context, 'Sensor', 'sensor', selectedType, Icons.sensors, (v) => setState(() => selectedType = v)),
                 ],
               ),
               const SizedBox(height: 16),
@@ -96,14 +98,11 @@ class DevicesScreen extends StatelessWidget {
                     Navigator.pop(ctx);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal.shade600,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                    backgroundColor: colors.primary,
+                    foregroundColor: colors.onPrimary,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Text('Add Device',
-                      style: TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w600)),
+                  child: const Text('Add Device', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),
             ],
@@ -113,41 +112,25 @@ class DevicesScreen extends StatelessWidget {
     );
   }
 
-  Widget _typeChip(String label, String value, String selected,
-      IconData icon, Function(String) onTap) {
+  Widget _typeChip(BuildContext context, String label, String value, String selected, IconData icon, Function(String) onTap) {
     final isSelected = value == selected;
+    final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: () => onTap(value),
       child: Container(
-        padding:
-        const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color:
-          isSelected ? Colors.teal.shade50 : Colors.grey.shade100,
+          color: isSelected ? colors.primaryContainer : (isDark ? colors.surface : Colors.grey.shade100),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: isSelected
-                ? Colors.teal.shade400
-                : Colors.grey.shade200,
-          ),
+          border: Border.all(color: isSelected ? colors.primary.withOpacity(0.5) : Colors.transparent),
         ),
         child: Row(
           children: [
-            Icon(icon,
-                size: 16,
-                color: isSelected
-                    ? Colors.teal.shade600
-                    : Colors.grey.shade500),
+            Icon(icon, size: 16, color: isSelected ? colors.primary : colors.onSurfaceVariant),
             const SizedBox(width: 6),
-            Text(label,
-                style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
-                    color: isSelected
-                        ? Colors.teal.shade700
-                        : Colors.grey.shade600)),
+            Text(label, style: TextStyle(fontSize: 13, fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal, color: isSelected ? (isDark ? Colors.white : colors.primary) : colors.onSurfaceVariant)),
           ],
         ),
       ),
@@ -156,17 +139,12 @@ class DevicesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+
     return Scaffold(
-      backgroundColor: Colors.grey.shade50,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios, size: 18),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(roomName,
-            style: const TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(roomName),
         actions: [
           Padding(
             padding: const EdgeInsets.only(right: 8),
@@ -175,12 +153,10 @@ class DevicesScreen extends StatelessWidget {
               icon: const Icon(Icons.add, size: 16),
               label: const Text('Add'),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal.shade600,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 8),
+                backgroundColor: colors.primary,
+                foregroundColor: colors.onPrimary,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               ),
             ),
           ),
@@ -198,16 +174,11 @@ class DevicesScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.devices_outlined,
-                      size: 64, color: Colors.grey.shade300),
+                  Icon(Icons.devices_outlined, size: 64, color: Theme.of(context).dividerColor),
                   const SizedBox(height: 12),
-                  Text('No devices yet',
-                      style: TextStyle(
-                          fontSize: 16, color: Colors.grey.shade500)),
+                  Text('No devices yet', style: TextStyle(fontSize: 16, color: colors.onSurfaceVariant)),
                   const SizedBox(height: 4),
-                  Text('Tap Add to connect a device',
-                      style: TextStyle(
-                          fontSize: 13, color: Colors.grey.shade400)),
+                  Text('Tap Add to connect a device', style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant.withOpacity(0.6))),
                 ],
               ),
             );
@@ -215,18 +186,18 @@ class DevicesScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: docs.length,
-            separatorBuilder: (_, __) =>
-            const SizedBox(height: 12),
+            separatorBuilder: (_, __) => const SizedBox(height: 12),
             itemBuilder: (context, i) {
               final doc = docs[i];
               final name = doc['name'] as String;
               final type = doc['type'] as String;
               final deviceId = doc['deviceId'] as String;
-              if (type == 'relay') {
-                return RelayCard(name: name, deviceId: deviceId);
-              } else {
-                return SensorCard(name: name, deviceId: deviceId);
-              }
+
+              Widget card = type == 'relay'
+                  ? RelayCard(name: name, deviceId: deviceId, decoration: _cardDecoration(context))
+                  : SensorCard(name: name, deviceId: deviceId, decorationBuilder: _cardDecoration);
+
+              return FadeInSlide(delay: Duration(milliseconds: 100 * i), child: card);
             },
           );
         },
@@ -235,75 +206,55 @@ class DevicesScreen extends StatelessWidget {
   }
 }
 
-// ── Relay Card ──────────────────────────────────────────────────
 class RelayCard extends StatelessWidget {
   final String name;
   final String deviceId;
-  const RelayCard(
-      {super.key, required this.name, required this.deviceId});
+  final BoxDecoration decoration;
 
-  DatabaseReference get _ref =>
-      FirebaseDatabase.instance.ref('devices/$deviceId/relay');
+  const RelayCard({super.key, required this.name, required this.deviceId, required this.decoration});
+
+  DatabaseReference get _ref => FirebaseDatabase.instance.ref('devices/$deviceId/relay');
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = Theme.of(context).colorScheme;
+
     return StreamBuilder(
       stream: _ref.onValue,
       builder: (context, snapshot) {
-        final isOn =
-            snapshot.data?.snapshot.value as bool? ?? false;
+        final isOn = snapshot.data?.snapshot.value as bool? ?? false;
+
+        // Dynamic decoration to highlight when ON
+        final activeDecoration = decoration.copyWith(
+          color: isOn ? (isDark ? Colors.amber.withOpacity(0.1) : Colors.amber.shade50) : decoration.color,
+          border: Border.all(color: isOn ? (isDark ? Colors.amber.withOpacity(0.3) : Colors.amber.shade200) : (isDark ? Colors.white12 : Colors.transparent)),
+        );
+
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isOn
-                  ? Colors.amber.shade200
-                  : Colors.grey.shade100,
-            ),
-          ),
+          decoration: activeDecoration,
           child: Row(
             children: [
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isOn
-                      ? Colors.amber.shade50
-                      : Colors.grey.shade100,
+                  color: isOn ? (isDark ? Colors.amber.withOpacity(0.2) : Colors.amber.shade100) : (isDark ? Colors.white12 : Colors.grey.shade100),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(
-                  Icons.lightbulb_outline,
-                  color: isOn ? Colors.amber.shade600 : Colors.grey,
-                  size: 24,
-                ),
+                child: Icon(Icons.lightbulb_outline, color: isOn ? Colors.amber.shade600 : Colors.grey, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(name,
-                        style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15)),
-                    Text(
-                      isOn ? 'Turned ON' : 'Turned OFF',
-                      style: TextStyle(
-                          fontSize: 12,
-                          color: isOn
-                              ? Colors.amber.shade700
-                              : Colors.grey.shade400),
-                    ),
+                    Text(name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: colors.onSurface)),
+                    Text(isOn ? 'Turned ON' : 'Turned OFF', style: TextStyle(fontSize: 12, color: isOn ? Colors.amber.shade700 : colors.onSurfaceVariant)),
                   ],
                 ),
               ),
-              Switch(
-                value: isOn,
-                onChanged: (val) => _ref.set(val),
-                activeColor: Colors.teal,
-              ),
+              Switch(value: isOn, onChanged: (val) => _ref.set(val), activeColor: colors.primary),
             ],
           ),
         );
@@ -312,39 +263,36 @@ class RelayCard extends StatelessWidget {
   }
 }
 
-// ── Sensor Card ─────────────────────────────────────────────────
 class SensorCard extends StatelessWidget {
   final String name;
   final String deviceId;
-  const SensorCard(
-      {super.key, required this.name, required this.deviceId});
+  final BoxDecoration Function(BuildContext, {Color? customColor}) decorationBuilder;
 
-  DatabaseReference get _ref =>
-      FirebaseDatabase.instance.ref('devices/$deviceId');
+  const SensorCard({super.key, required this.name, required this.deviceId, required this.decorationBuilder});
+
+  DatabaseReference get _ref => FirebaseDatabase.instance.ref('devices/$deviceId');
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final colors = Theme.of(context).colorScheme;
+
     return StreamBuilder(
       stream: _ref.onValue,
       builder: (context, snapshot) {
-        final data =
-            snapshot.data?.snapshot.value as Map? ?? {};
+        final data = snapshot.data?.snapshot.value as Map? ?? {};
         final temp = data['temperature']?.toString() ?? '--';
         final humidity = data['humidity']?.toString() ?? '--';
         final gas = data['gas'] as String? ?? 'unknown';
         final isDanger = gas == 'danger';
 
+        final activeDecoration = decorationBuilder(context, customColor: isDanger ? (isDark ? Colors.red.withOpacity(0.1) : Colors.red.shade50) : null).copyWith(
+          border: isDanger ? Border.all(color: isDark ? Colors.red.shade800 : Colors.red.shade200) : null,
+        );
+
         return Container(
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isDanger
-                  ? Colors.red.shade200
-                  : Colors.grey.shade100,
-            ),
-          ),
+          decoration: activeDecoration,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -353,55 +301,30 @@ class SensorCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: isDanger
-                          ? Colors.red.shade50
-                          : Colors.blue.shade50,
+                      color: isDanger ? (isDark ? Colors.red.withOpacity(0.2) : Colors.red.shade100) : (isDark ? Colors.blue.withOpacity(0.1) : Colors.blue.shade50),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Icon(Icons.sensors,
-                        color: isDanger
-                            ? Colors.red.shade600
-                            : Colors.blue.shade600,
-                        size: 24),
+                    child: Icon(Icons.sensors, color: isDanger ? Colors.red.shade500 : Colors.blue.shade500, size: 24),
                   ),
                   const SizedBox(width: 12),
-                  Text(name,
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w600, fontSize: 15)),
+                  Text(name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: colors.onSurface)),
                   const Spacer(),
                   if (isDanger)
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text('GAS DANGER',
-                          style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.red.shade700)),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(color: isDark ? Colors.red.withOpacity(0.2) : Colors.red.shade100, borderRadius: BorderRadius.circular(20)),
+                      child: Text('GAS DANGER', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.red.shade700)),
                     ),
                 ],
               ),
               const SizedBox(height: 16),
               Row(
                 children: [
-                  _stat(Icons.thermostat, '$temp°C', 'Temperature',
-                      Colors.orange),
-                  _divider(),
-                  _stat(Icons.water_drop_outlined, '$humidity%',
-                      'Humidity', Colors.blue),
-                  _divider(),
-                  _stat(
-                    isDanger
-                        ? Icons.warning_amber_rounded
-                        : Icons.check_circle_outline,
-                    isDanger ? 'Danger' : 'Safe',
-                    'Gas',
-                    isDanger ? Colors.red : Colors.green,
-                  ),
+                  _stat(context, Icons.thermostat, '$temp°C', 'Temperature', isDark ? Colors.orange.shade300 : Colors.orange),
+                  _divider(context),
+                  _stat(context, Icons.water_drop_outlined, '$humidity%', 'Humidity', isDark ? Colors.blue.shade300 : Colors.blue),
+                  _divider(context),
+                  _stat(context, isDanger ? Icons.warning_amber_rounded : Icons.check_circle_outline, isDanger ? 'Danger' : 'Safe', 'Gas', isDanger ? (isDark ? Colors.red.shade300 : Colors.red) : (isDark ? Colors.green.shade300 : Colors.green)),
                 ],
               ),
             ],
@@ -411,24 +334,18 @@ class SensorCard extends StatelessWidget {
     );
   }
 
-  Widget _stat(
-      IconData icon, String value, String label, Color color) {
+  Widget _stat(BuildContext context, IconData icon, String value, String label, Color color) {
     return Expanded(
       child: Column(
         children: [
           Icon(icon, color: color, size: 22),
           const SizedBox(height: 4),
-          Text(value,
-              style: const TextStyle(
-                  fontWeight: FontWeight.bold, fontSize: 14)),
-          Text(label,
-              style: TextStyle(
-                  fontSize: 10, color: Colors.grey.shade500)),
+          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Theme.of(context).colorScheme.onSurface)),
+          Text(label, style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onSurfaceVariant)),
         ],
       ),
     );
   }
 
-  Widget _divider() =>
-      Container(width: 1, height: 40, color: Colors.grey.shade100);
+  Widget _divider(BuildContext context) => Container(width: 1, height: 40, color: Theme.of(context).dividerColor);
 }

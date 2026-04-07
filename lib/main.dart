@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'widgets/auth_gate.dart';
+import 'theme/app_theme.dart'; // <-- 1. Import your new theme file
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,10 +20,12 @@ class HomeEaseApp extends StatelessWidget {
     return MaterialApp(
       title: 'HomeEase',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
-        useMaterial3: true,
-      ),
+
+      // 2. Replace the old ThemeData with your custom AppTheme
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system, // <-- Automatically switches based on device settings
+
       home: const AuthGate(),
     );
   }
