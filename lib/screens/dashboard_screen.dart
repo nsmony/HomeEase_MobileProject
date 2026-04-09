@@ -11,8 +11,6 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final name = user?.displayName ?? 'User';
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -33,8 +31,23 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text('Good ${_greeting()}! 👋',
                             style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
-                        Text(name,
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colors.onSurface)),
+
+                        // ✅ FIX: Added StreamBuilder to fetch name from Firestore
+                        StreamBuilder<DocumentSnapshot>(
+                          stream: FirebaseFirestore.instance.collection('users').doc(_uid).snapshots(),
+                          builder: (context, snapshot) {
+                            String displayName = 'User';
+                            if (snapshot.hasData && snapshot.data!.data() != null) {
+                              final data = snapshot.data!.data() as Map<String, dynamic>;
+                              displayName = data['name'] ?? FirebaseAuth.instance.currentUser?.displayName ?? 'User';
+                            }
+
+                            return Text(
+                              displayName,
+                              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colors.onSurface),
+                            );
+                          },
+                        ),
                       ],
                     ),
                     Container(

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 import 'register_screen.dart';
+import 'forgot_password_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,9 +35,18 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await _auth.login(_emailCtrl.text.trim(), _passCtrl.text);
     } on FirebaseAuthException catch (e) {
-      setState(() => _error = _auth.getErrorMessage(e.code));
+      String errorMsg = _auth.getErrorMessage(e.code);
+
+      // Special handling for user-not-found error
+      if (e.code == 'user-not-found') {
+        errorMsg = 'No account found with this email. Please register first.';
+      }
+
+      setState(() => _error = errorMsg);
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
@@ -116,6 +126,26 @@ class _LoginScreenState extends State<LoginScreen> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   filled: true,
                   fillColor: isDark ? colors.surface : Colors.grey.shade100,
+                ),
+              ),
+
+              // Forgot password link
+              const SizedBox(height: 8),
+              Align(
+                alignment: Alignment.centerRight,
+                child: GestureDetector(
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                  ),
+                  child: Text(
+                    'Forgot password?',
+                    style: TextStyle(
+                      color: colors.primary,
+                      fontWeight: FontWeight.w500,
+                      fontSize: 13,
+                    ),
+                  ),
                 ),
               ),
 

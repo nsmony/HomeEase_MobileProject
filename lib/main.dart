@@ -2,13 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'widgets/auth_gate.dart';
-import 'theme/app_theme.dart'; // <-- 1. Import your new theme file
+import 'theme/app_theme.dart';
+import 'theme/theme_manager.dart'; // Import the manager
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  // Load saved theme preference
+  await themeManager.loadTheme();
+
   runApp(const HomeEaseApp());
 }
 
@@ -17,16 +22,19 @@ class HomeEaseApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HomeEase',
-      debugShowCheckedModeBanner: false,
-
-      // 2. Replace the old ThemeData with your custom AppTheme
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system, // <-- Automatically switches based on device settings
-
-      home: const AuthGate(),
+    // Listen for theme changes
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: themeManager.themeModeNotifier,
+      builder: (context, currentThemeMode, child) {
+        return MaterialApp(
+          title: 'HomeEase',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.light,
+          darkTheme: AppTheme.dark,
+          themeMode: currentThemeMode, // Dynamic theme
+          home: const AuthGate(),
+        );
+      },
     );
   }
 }

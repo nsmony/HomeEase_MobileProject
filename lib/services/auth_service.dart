@@ -5,19 +5,20 @@ class AuthService {
   final _auth = FirebaseAuth.instance;
   final _db = FirebaseFirestore.instance;
 
-  // Stream — listens to login/logout in real time
   Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-  // Current logged in user
   User? get currentUser => _auth.currentUser;
 
-  // Register
+  // ✅ REGISTER (FINAL)
   Future<void> register(String name, String email, String password) async {
     final cred = await _auth.createUserWithEmailAndPassword(
       email: email,
       password: password,
     );
+
+    // Optional: still set displayName (not relied on)
     await cred.user!.updateDisplayName(name);
+
+    // ✅ STORE REAL DATA IN FIRESTORE (SOURCE OF TRUTH)
     await _db.collection('users').doc(cred.user!.uid).set({
       'name': name,
       'email': email,
@@ -25,7 +26,6 @@ class AuthService {
     });
   }
 
-  // Login
   Future<void> login(String email, String password) async {
     await _auth.signInWithEmailAndPassword(
       email: email,
@@ -33,33 +33,28 @@ class AuthService {
     );
   }
 
-  // Logout
   Future<void> logout() async {
     await _auth.signOut();
   }
 
-  // Password reset
   Future<void> resetPassword(String email) async {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  // Friendly error messages
   String getErrorMessage(String code) {
     switch (code) {
       case 'user-not-found':
-        return 'No account found for this email.';
+        return 'No account found with this email.';
       case 'wrong-password':
-        return 'Incorrect password. Try again.';
+        return 'Incorrect password.';
       case 'email-already-in-use':
-        return 'An account already exists for this email.';
+        return 'Email already in use.';
       case 'invalid-email':
-        return 'Please enter a valid email address.';
+        return 'Invalid email.';
       case 'weak-password':
-        return 'Password must be at least 6 characters.';
-      case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
+        return 'Password too weak.';
       default:
-        return 'Something went wrong. Please try again.';
+        return 'Something went wrong.';
     }
   }
 }

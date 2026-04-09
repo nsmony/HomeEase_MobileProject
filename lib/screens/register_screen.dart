@@ -40,10 +40,43 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       await _auth.register(_nameCtrl.text.trim(), _emailCtrl.text.trim(), _passCtrl.text);
+
+      // Reload the user to get updated display name
+      await FirebaseAuth.instance.currentUser?.reload();
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle, color: Colors.white),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text('Account created successfully! Welcome to HomeEase.'),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+
+        // Navigate back to login (Firebase auth will auto-navigate to home)
+        // Or you can navigate directly to home if your app handles it
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (mounted) {
+          Navigator.pop(context);
+        }
+      }
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _auth.getErrorMessage(e.code));
     } finally {
-      setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _loading = false);
+      }
     }
   }
 
