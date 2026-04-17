@@ -206,7 +206,7 @@ class _AlertThresholdTile extends StatelessWidget {
                 ],
               ),
             ),
-            Switch(value: enabled, onChanged: onToggle, activeColor: color),
+            Switch(value: enabled, onChanged: onToggle, activeThumbColor: color),
           ]),
           if (enabled) ...[
             const SizedBox(height: 4),

@@ -43,6 +43,21 @@ class AuthService {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
+  // Update profile
+  Future<void> updateProfile({String? name, String? photoUrl}) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    if (name != null) {
+      await user.updateDisplayName(name);
+      await _db.collection('users').doc(user.uid).update({'name': name});
+    }
+
+    if (photoUrl != null) {
+      await user.updatePhotoURL(photoUrl);
+    }
+  }
+
   // Friendly error messages
   String getErrorMessage(String code) {
     switch (code) {

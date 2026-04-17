@@ -13,15 +13,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _auth = AuthService();
   bool _sent = false;
   bool _loading = false;
+  String? _errorMessage;
 
   Future<void> _send() async {
     if (_emailCtrl.text.isEmpty) return;
-    setState(() => _loading = true);
+    setState(() {
+      _loading = true;
+      _errorMessage = null;
+    });
     try {
       await _auth.resetPassword(_emailCtrl.text.trim());
       setState(() => _sent = true);
     } catch (e) {
-      // Handle error visually here if needed
+      setState(() => _errorMessage = 'Failed to send reset link. Please try again.');
     } finally {
       setState(() => _loading = false);
     }
@@ -102,6 +106,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   fillColor: Colors.grey.shade50,
                 ),
               ),
+              if (_errorMessage != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _errorMessage!,
+                  style: TextStyle(color: Colors.red.shade600, fontSize: 12),
+                ),
+              ],
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,

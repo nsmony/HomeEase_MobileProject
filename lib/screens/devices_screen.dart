@@ -254,7 +254,7 @@ class RelayCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Switch(value: isOn, onChanged: (val) => _ref.set(val), activeColor: colors.primary),
+              Switch(value: isOn, onChanged: (val) => _ref.set(val), activeThumbColor: colors.primary),
             ],
           ),
         );
