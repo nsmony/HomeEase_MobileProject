@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -15,6 +16,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passCtrl = TextEditingController();
   final _confirmCtrl = TextEditingController();
   final _auth = AuthService();
+  final _phoneCtrl = TextEditingController();
   bool _loading = false;
   bool _obscurePass = true;
   String? _error;
@@ -29,7 +31,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _register() async {
-    if (_nameCtrl.text.trim().isEmpty || _emailCtrl.text.trim().isEmpty || _passCtrl.text.isEmpty) {
+    if (_nameCtrl.text.trim().isEmpty ||
+        _emailCtrl.text.trim().isEmpty ||
+        _passCtrl.text.isEmpty) {
       setState(() => _error = 'Please fill in all fields.');
       return;
     }
@@ -37,9 +41,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
       setState(() => _error = 'Passwords do not match.');
       return;
     }
-    setState(() { _loading = true; _error = null; });
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
     try {
-      await _auth.register(_nameCtrl.text.trim(), _emailCtrl.text.trim(), _passCtrl.text);
+      await _auth.register(
+        _nameCtrl.text.trim(),
+        _emailCtrl.text.trim(),
+        _passCtrl.text,
+      );
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _auth.getErrorMessage(e.code));
     } finally {
@@ -66,9 +77,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Create account', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: colors.onSurface)),
+              Text(
+                'Create account',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w700,
+                  color: colors.onSurface,
+                ),
+              ),
               const SizedBox(height: 4),
-              Text('Join HomeEase today', style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant)),
+              Text(
+                'Join HomeEase today',
+                style: TextStyle(fontSize: 14, color: colors.onSurfaceVariant),
+              ),
 
               const SizedBox(height: 32),
 
@@ -99,7 +120,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 colors: colors,
                 isDark: isDark,
                 suffixIcon: IconButton(
-                  icon: Icon(_obscurePass ? Icons.visibility_off_outlined : Icons.visibility_outlined, color: colors.onSurfaceVariant),
+                  icon: Icon(
+                    _obscurePass
+                        ? Icons.visibility_off_outlined
+                        : Icons.visibility_outlined,
+                    color: colors.onSurfaceVariant,
+                  ),
                   onPressed: () => setState(() => _obscurePass = !_obscurePass),
                 ),
               ),
@@ -119,16 +145,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.red.withOpacity(0.2) : Colors.red.shade50,
+                    color: isDark
+                        ? Colors.red.withOpacity(0.2)
+                        : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: isDark ? Colors.red.shade800 : Colors.red.shade200),
+                    border: Border.all(
+                      color: isDark ? Colors.red.shade800 : Colors.red.shade200,
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.error_outline, color: Colors.red.shade400, size: 16),
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red.shade400,
+                        size: 16,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(_error!, style: TextStyle(color: isDark ? Colors.red.shade200 : Colors.red.shade700, fontSize: 13)),
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.red.shade200
+                                : Colors.red.shade700,
+                            fontSize: 13,
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -145,11 +187,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: colors.primary,
                     foregroundColor: colors.onPrimary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   child: _loading
-                      ? SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: colors.onPrimary, strokeWidth: 2))
-                      : const Text('Create Account', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                      ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            color: colors.onPrimary,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          'Create Account',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ],
@@ -178,7 +235,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         labelText: label,
         prefixIcon: Icon(icon, color: colors.onSurfaceVariant),
         suffixIcon: suffixIcon,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
         filled: true,
         fillColor: isDark ? colors.surface : Colors.grey.shade100,
       ),

@@ -8,7 +8,8 @@ class RoomsScreen extends StatelessWidget {
   const RoomsScreen({super.key});
 
   String get _uid => FirebaseAuth.instance.currentUser!.uid;
-  CollectionReference get _rooms => FirebaseFirestore.instance.collection('users/$_uid/rooms');
+  CollectionReference get _rooms =>
+      FirebaseFirestore.instance.collection('users/$_uid/rooms');
 
   IconData _roomIcon(String name) {
     final n = name.toLowerCase();
@@ -30,17 +31,28 @@ class RoomsScreen extends StatelessWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(24))),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       builder: (ctx) => Padding(
         padding: EdgeInsets.only(
-          left: 24, right: 24, top: 24,
+          left: 24,
+          right: 24,
+          top: 24,
           bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Add a room', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: colors.onSurface)),
+            Text(
+              'Add a room',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: colors.onSurface,
+              ),
+            ),
             const SizedBox(height: 16),
             TextField(
               controller: nameCtrl,
@@ -48,8 +60,14 @@ class RoomsScreen extends StatelessWidget {
               style: TextStyle(color: colors.onSurface),
               decoration: InputDecoration(
                 hintText: 'e.g. Living Room, Bedroom',
-                prefixIcon: Icon(Icons.meeting_room_outlined, color: colors.onSurfaceVariant),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                prefixIcon: Icon(
+                  Icons.meeting_room_outlined,
+                  color: colors.onSurfaceVariant,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
                 filled: true,
                 fillColor: isDark ? colors.surface : Colors.grey.shade100,
               ),
@@ -71,15 +89,66 @@ class RoomsScreen extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
                   foregroundColor: colors.onPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
-                child: const Text('Add Room', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                child: const Text(
+                  'Add Room',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(
+    BuildContext context,
+    String docId,
+    String roomName,
+  ) async {
+    final colors = Theme.of(context).colorScheme;
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text('Delete Room'),
+        content: Text(
+          'Are you sure you want to delete "$roomName"? This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              'Cancel',
+              style: TextStyle(color: colors.onSurfaceVariant),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              'Delete',
+              style: TextStyle(
+                color: colors.error,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      await _deleteRoom(docId);
+    }
+  }
+
+  Future<void> _deleteRoom(String docId) async {
+    await _rooms.doc(docId).delete();
   }
 
   @override
@@ -99,7 +168,14 @@ class RoomsScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   FadeInSlide(
-                    child: Text('My Rooms', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colors.onSurface)),
+                    child: Text(
+                      'My Rooms',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: colors.onSurface,
+                      ),
+                    ),
                   ),
                   FadeInSlide(
                     delay: const Duration(milliseconds: 100),
@@ -110,8 +186,13 @@ class RoomsScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: colors.primary,
                         foregroundColor: colors.onPrimary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
                       ),
                     ),
                   ),
@@ -132,57 +213,149 @@ class RoomsScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.meeting_room_outlined, size: 64, color: isDark ? Colors.white24 : Colors.grey.shade300),
+                          Icon(
+                            Icons.meeting_room_outlined,
+                            size: 64,
+                            color: isDark
+                                ? Colors.white24
+                                : Colors.grey.shade300,
+                          ),
                           const SizedBox(height: 12),
-                          Text('No rooms yet', style: TextStyle(fontSize: 16, color: colors.onSurfaceVariant)),
+                          Text(
+                            'No rooms yet',
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: colors.onSurfaceVariant,
+                            ),
+                          ),
                           const SizedBox(height: 4),
-                          Text('Tap Add Room to get started', style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant.withOpacity(0.6))),
+                          Text(
+                            'Tap Add Room to get started',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: colors.onSurfaceVariant.withOpacity(0.6),
+                            ),
+                          ),
                         ],
                       ),
                     );
                   }
                   return GridView.builder(
                     padding: const EdgeInsets.all(20),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.1,
-                    ),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 12,
+                          mainAxisSpacing: 12,
+                          childAspectRatio: 1.1,
+                        ),
                     itemCount: docs.length,
                     itemBuilder: (context, i) {
                       final doc = docs[i];
                       final name = doc['name'] as String;
 
                       return FadeInSlide(
-                        delay: Duration(milliseconds: 100 + (i * 50)), // Staggered entry
+                        delay: Duration(
+                          milliseconds: 100 + (i * 50),
+                        ), // Staggered entry
                         child: GestureDetector(
                           onTap: () => Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => DevicesScreen(roomId: doc.id, roomName: name)),
+                            MaterialPageRoute(
+                              builder: (_) =>
+                                  DevicesScreen(roomId: doc.id, roomName: name),
+                            ),
                           ),
                           child: Container(
                             padding: const EdgeInsets.all(16),
                             decoration: BoxDecoration(
                               color: colors.surface,
                               borderRadius: BorderRadius.circular(16),
-                              border: isDark ? Border.all(color: Colors.white12) : null,
-                              boxShadow: isDark ? [] : [
-                                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
-                              ],
+                              border: isDark
+                                  ? Border.all(color: Colors.white12)
+                                  : null,
+                              boxShadow: isDark
+                                  ? []
+                                  : [
+                                      BoxShadow(
+                                        color: Colors.black.withOpacity(0.04),
+                                        blurRadius: 10,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
                             ),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                    color: colors.primaryContainer,
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Icon(_roomIcon(name), color: colors.primary, size: 24),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(10),
+                                      decoration: BoxDecoration(
+                                        color: colors.primaryContainer,
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Icon(
+                                        _roomIcon(name),
+                                        color: colors.primary,
+                                        size: 24,
+                                      ),
+                                    ),
+                                    const Spacer(),
+                                    GestureDetector(
+                                      onTap: () =>
+                                          _confirmDelete(context, doc.id, name),
+                                      child: Container(
+                                        padding: const EdgeInsets.all(6),
+                                        decoration: BoxDecoration(
+                                          color: colors.errorContainer,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              'Delete',
+                                              style: TextStyle(
+                                                color: colors.error,
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 4),
+                                            Icon(
+                                              Icons.delete_outline,
+                                              color: colors.error,
+                                              size: 16,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                                 const Spacer(),
-                                Text(name, style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: colors.onSurface), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 15,
+                                    color: colors.onSurface,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                                 const SizedBox(height: 2),
-                                Text('Tap to manage', style: TextStyle(fontSize: 11, color: colors.onSurfaceVariant)),
+                                Text(
+                                  'Tap to manage',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: colors.onSurfaceVariant,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
