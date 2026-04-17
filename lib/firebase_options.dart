@@ -10,6 +10,6 @@ class DefaultFirebaseOptions {
     appId: '1:107616380311:android:48e93d9d001e6a5db350d2',
     messagingSenderId: '107616380311',
     projectId: 'homeease-16dfd',
-    storageBucket: 'homeease-16dfd.firebasestorage.app',
+    storageBucket: 'homeease-16dfd.appspot.com',
   );
 }

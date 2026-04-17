@@ -56,6 +56,9 @@ class AuthService {
     if (photoUrl != null) {
       await user.updatePhotoURL(photoUrl);
     }
+    
+    // Refresh the user object to reflect changes
+    await user.reload();
   }
 
   // Friendly error messages
