@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
@@ -54,10 +55,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       await _auth.register(
           _nameCtrl.text.trim(), _emailCtrl.text.trim(), _passCtrl.text);
+      if(mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _auth.getErrorMessage(e.code));
     } finally {
-      setState(() => _loading = false);
+      if(mounted) setState(() => _loading = false);
     }
   }
 
@@ -144,7 +146,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
                     color: isDark
-                        ? Colors.red.withOpacity(0.2)
+                        ? Colors.red.withAlpha(51)
                         : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(

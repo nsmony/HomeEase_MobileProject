@@ -1,11 +1,13 @@
+
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:homeease/services/auth_service.dart';
 
-void showEditProfileDialog(BuildContext context) {
+Future<void> showEditProfileDialog(BuildContext context) {
   final nameCtrl = TextEditingController(text: FirebaseAuth.instance.currentUser?.displayName);
 
-  showDialog(
+  return showDialog(
     context: context,
     builder: (context) => AlertDialog(
       title: const Text("Edit Profile"),
@@ -20,7 +22,7 @@ void showEditProfileDialog(BuildContext context) {
             if (nameCtrl.text.trim().isEmpty) return;
             try {
               await AuthService().updateProfile(name: nameCtrl.text.trim());
-              Navigator.pop(context);
+              if(context.mounted) Navigator.pop(context);
             } catch (e) {
               // Handle error
             }

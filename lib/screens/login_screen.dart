@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
@@ -70,10 +71,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('HomeEase',
-                          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: colors.primary)),
-                      Text('Smart home control',
-                          style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
+                      Text('HomeEase', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: colors.primary)),
+                      Text('Smart home control', style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
                     ],
                   ),
                 ],
@@ -124,7 +123,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: isDark ? Colors.red.withOpacity(0.2) : Colors.red.shade50,
+                    color: isDark ? Colors.red.withAlpha(51) : Colors.red.shade50,
                     borderRadius: BorderRadius.circular(8),
                     border: Border.all(color: isDark ? Colors.red.shade800 : Colors.red.shade200),
                   ),

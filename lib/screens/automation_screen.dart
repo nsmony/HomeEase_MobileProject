@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -80,7 +81,7 @@ class AutomationScreen extends StatelessWidget {
                                   color: colors.surface,
                                   borderRadius: BorderRadius.circular(12),
                                   border: isDark ? Border.all(color: Colors.white12) : null,
-                                  boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4))],
+                                  boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4))],
                                 ),
                                 child: Column(
                                   children: [
@@ -172,7 +173,7 @@ class _DeviceAutomationCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: isDark ? Border.all(color: Colors.white12) : null,
             boxShadow: isDark ? [] : [
-              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+              BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
             ],
           ),
           child: Column(
@@ -226,7 +227,7 @@ class _DeviceAutomationCard extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(children: [
-        Icon(icon, color: value ? color : colors.onSurfaceVariant.withOpacity(0.5), size: 20),
+        Icon(icon, color: value ? color : colors.onSurfaceVariant.withAlpha(128), size: 20),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -268,7 +269,7 @@ class _TimePicker extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withOpacity(0.3)),
+          color: color.withAlpha(26), borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withAlpha(77)),
         ),
         child: Row(children: [
           Icon(Icons.access_time, color: color, size: 16),

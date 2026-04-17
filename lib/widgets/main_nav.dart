@@ -26,7 +26,6 @@ class _MainNavState extends State<MainNav> {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: IndexedStack(

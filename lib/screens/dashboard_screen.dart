@@ -1,3 +1,4 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -134,7 +135,7 @@ BoxDecoration _cardDecoration(BuildContext context, {Color? customColor}) {
     border: isDark ? Border.all(color: Colors.white12) : null,
     boxShadow: isDark ? [] : [
       BoxShadow(
-        color: Colors.black.withOpacity(0.04),
+        color: Colors.black.withAlpha(10),
         blurRadius: 15,
         offset: const Offset(0, 5),
       ),
@@ -180,7 +181,7 @@ class _DeviceCountCard extends StatelessWidget {
               rooms.map((r) => FirebaseFirestore.instance.collection('users/$uid/rooms/${r.id}/devices').get()),
             )),
             builder: (context, devSnap) {
-              final total = devSnap.data?.fold<int>(0, (sum, qs) => sum + qs.docs.length) ?? 0;
+              final total = devSnap.data?.fold<int>(0, (acc, qs) => acc + qs.docs.length) ?? 0;
               return _statCard(context, 'Devices', total.toString(), Icons.devices, Colors.teal);
             },
           );
@@ -200,7 +201,7 @@ Widget _statCard(BuildContext context, String label, String value, IconData icon
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: isDark ? color.withOpacity(0.2) : color.shade50,
+            color: isDark ? color.withAlpha(51) : color.shade50,
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(icon, color: isDark ? color.shade200 : color.shade600, size: 20),
@@ -238,7 +239,7 @@ class _EnvironmentCard extends StatelessWidget {
 
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: _cardDecoration(context, customColor: isDanger ? (isDark ? Colors.red.withOpacity(0.2) : Colors.red.shade50) : null),
+          decoration: _cardDecoration(context, customColor: isDanger ? (isDark ? Colors.red.withAlpha(51) : Colors.red.shade50) : null),
           child: Row(
             children: [
               _envTile(context, Icons.thermostat, '$temp°C', 'Temp', isDark ? Colors.orange.shade300 : Colors.orange),
@@ -289,7 +290,7 @@ class _PresenceCard extends StatelessWidget {
         final present = snapshot.data?.snapshot.value as bool? ?? false;
 
         Color bgColor = Theme.of(context).colorScheme.surface;
-        if (present) bgColor = isDark ? Colors.teal.withOpacity(0.15) : Colors.teal.shade50;
+        if (present) bgColor = isDark ? Colors.teal.withAlpha(38) : Colors.teal.shade50;
 
         return Container(
           padding: const EdgeInsets.all(16),
@@ -299,7 +300,7 @@ class _PresenceCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: present ? (isDark ? Colors.teal.withOpacity(0.3) : Colors.teal.shade100) : Theme.of(context).dividerColor,
+                  color: present ? (isDark ? Colors.teal.withAlpha(77) : Colors.teal.shade100) : Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
@@ -367,7 +368,7 @@ class _ActiveAlertsCard extends StatelessWidget {
         if (alerts.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(16),
-            decoration: _cardDecoration(context, customColor: isDark ? Colors.green.withOpacity(0.1) : Colors.green.shade50),
+            decoration: _cardDecoration(context, customColor: isDark ? Colors.green.withAlpha(26) : Colors.green.shade50),
             child: Row(children: [
               Icon(Icons.check_circle_outline, color: isDark ? Colors.greenAccent : Colors.green.shade600),
               const SizedBox(width: 12),
@@ -382,9 +383,9 @@ class _ActiveAlertsCard extends StatelessWidget {
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: (a['color'] as Color).withOpacity(isDark ? 0.2 : 0.08),
+              color: (a['color'] as Color).withAlpha(isDark ? 51 : 20),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: (a['color'] as Color).withOpacity(isDark ? 0.5 : 0.3)),
+              border: Border.all(color: (a['color'] as Color).withAlpha(isDark ? 128 : 77)),
             ),
             child: Row(children: [
               Icon(a['icon'] as IconData, color: a['color'] as Color, size: 20),

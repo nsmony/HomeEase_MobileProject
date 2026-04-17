@@ -1,12 +1,18 @@
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'devices_screen.dart';
 import '../widgets/fade_animator.dart';
 
-class RoomsScreen extends StatelessWidget {
+class RoomsScreen extends StatefulWidget {
   const RoomsScreen({super.key});
 
+  @override
+  State<RoomsScreen> createState() => _RoomsScreenState();
+}
+
+class _RoomsScreenState extends State<RoomsScreen> {
   String get _uid => FirebaseAuth.instance.currentUser!.uid;
   CollectionReference get _rooms => FirebaseFirestore.instance.collection('users/$_uid/rooms');
 
@@ -60,13 +66,15 @@ class RoomsScreen extends StatelessWidget {
               height: 50,
               child: ElevatedButton(
                 onPressed: () async {
+                  final navigator = Navigator.of(context);
                   final name = nameCtrl.text.trim();
                   if (name.isEmpty) return;
                   await _rooms.add({
                     'name': name,
                     'createdAt': FieldValue.serverTimestamp(),
                   });
-                  Navigator.pop(ctx);
+                  if (!mounted) return;
+                  navigator.pop();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: colors.primary,
@@ -136,7 +144,7 @@ class RoomsScreen extends StatelessWidget {
                           const SizedBox(height: 12),
                           Text('No rooms yet', style: TextStyle(fontSize: 16, color: colors.onSurfaceVariant)),
                           const SizedBox(height: 4),
-                          Text('Tap Add Room to get started', style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant.withOpacity(0.6))),
+                          Text('Tap Add Room to get started', style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant.withAlpha(153))),
                         ],
                       ),
                     );
@@ -165,7 +173,7 @@ class RoomsScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(16),
                               border: isDark ? Border.all(color: Colors.white12) : null,
                               boxShadow: isDark ? [] : [
-                                BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+                                BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
                               ],
                             ),
                             child: Column(

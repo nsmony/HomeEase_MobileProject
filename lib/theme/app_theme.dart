@@ -8,8 +8,7 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.teal,
         brightness: Brightness.light,
-        background: Colors.grey.shade50,
-        surface: Colors.white,
+        surface: Colors.grey.shade50,
         primaryContainer: Colors.teal.shade50,
       ),
       scaffoldBackgroundColor: Colors.grey.shade50,
@@ -31,9 +30,9 @@ class AppTheme {
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.teal,
         brightness: Brightness.dark,
-        background: const Color(0xFF121212),
-        surface: const Color(0xFF1E1E1E),
-        primaryContainer: Colors.teal.withOpacity(0.2),
+        surface: const Color(0xFF121212),
+        surfaceContainer: const Color(0xFF1E1E1E),
+        primaryContainer: Colors.teal.withAlpha(51),
       ),
       scaffoldBackgroundColor: const Color(0xFF121212),
       dividerColor: Colors.grey.shade800,

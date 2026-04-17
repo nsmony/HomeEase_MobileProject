@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -50,7 +51,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     final photoUrl = await _storageService.uploadProfilePicture(uid);
                     if (photoUrl != null) {
                       await _authService.updateProfile(photoUrl: photoUrl);
-                      setState(() {});
+                      if(mounted) setState(() {});
                     }
                   },
                   child: Stack(
@@ -121,9 +122,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 delay: const Duration(milliseconds: 300),
                 child: Column(
                   children: [
-                    _actionButton(context, "Edit Profile", Icons.edit_outlined, () async {
-                      await showEditProfileDialog(context);
-                      setState(() {});
+                    _actionButton(context, "Edit Profile", Icons.edit_outlined, () {
+                      showEditProfileDialog(context).then((_) => setState(() {}));
                     }),
                     const SizedBox(height: 12),
                     _actionButton(context, "Change Password", Icons.lock_outline, () => showChangePasswordDialog(context)),
@@ -199,7 +199,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ? []
             : [
                 BoxShadow(
-                    color: Colors.black.withOpacity(0.03),
+                    color: Colors.black.withAlpha(8),
                     blurRadius: 10,
                     offset: const Offset(0, 4)),
               ],
@@ -233,7 +233,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: colors.surface,
         borderRadius: BorderRadius.circular(16),
         border: isDark ? Border.all(color: Colors.white12) : null,
-        boxShadow: isDark ? [] : [ BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4)) ],
+        boxShadow: isDark ? [] : [ BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 10, offset: const Offset(0, 4)) ],
       ),
       child: Row(
         children: [

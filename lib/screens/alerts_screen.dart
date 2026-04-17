@@ -1,3 +1,4 @@
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -126,7 +127,7 @@ class _DeviceAlertCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: isDark ? Border.all(color: Colors.white12) : null,
             boxShadow: isDark ? [] : [
-              BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+              BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
             ],
           ),
           child: Column(
@@ -195,7 +196,7 @@ class _AlertThresholdTile extends StatelessWidget {
       child: Column(
         children: [
           Row(children: [
-            Icon(icon, color: enabled ? color : colors.onSurfaceVariant.withOpacity(0.5), size: 20),
+            Icon(icon, color: enabled ? color : colors.onSurfaceVariant.withAlpha(128), size: 20),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
@@ -215,15 +216,15 @@ class _AlertThresholdTile extends StatelessWidget {
               Expanded(
                 child: SliderTheme(
                   data: SliderTheme.of(context).copyWith(
-                    activeTrackColor: color, thumbColor: color, overlayColor: color.withOpacity(0.1),
-                    inactiveTrackColor: color.withOpacity(0.2), trackHeight: 3,
+                    activeTrackColor: color, thumbColor: color, overlayColor: color.withAlpha(26),
+                    inactiveTrackColor: color.withAlpha(51), trackHeight: 3,
                   ),
                   child: Slider(value: value, min: min, max: max, divisions: (max - min).toInt(), onChanged: onSlide),
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(8)),
+                decoration: BoxDecoration(color: color.withAlpha(26), borderRadius: BorderRadius.circular(8)),
                 child: Text('${value.toInt()}$unit', style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 13)),
               ),
             ]),

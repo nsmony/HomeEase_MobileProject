@@ -1,5 +1,6 @@
 name: homeease
-description: "A new Flutter project."
+description: A new Flutter project.
+
 publish_to: 'none'
 
 version: 1.0.0+1
@@ -10,18 +11,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.27.0
-  firebase_auth: ^4.17.0
+
+  cupertino_icons: ^1.0.2
+  firebase_core: ^2.25.4
+  firebase_auth: ^4.17.4
   cloud_firestore: ^4.15.0
   firebase_database: ^10.4.0
   firebase_messaging: ^14.7.0
   image_picker: ^1.2.1
   firebase_storage: ^11.7.7
+  provider: ^6.0.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
   flutter_lints: ^2.0.0
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/images/
