@@ -16,7 +16,11 @@ class AuthGate extends StatelessWidget {
             body: Center(child: CircularProgressIndicator()),
           );
         }
-        if (snapshot.hasData) return const MainNav();
+        if (snapshot.hasData) {
+          // Reload user to ensure displayName is fresh
+          snapshot.data!.reload();
+          return const MainNav();
+        }
         return const LoginScreen();
       },
     );

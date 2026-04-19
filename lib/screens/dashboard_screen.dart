@@ -1,9 +1,8 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
-import '../widgets/fade_animator.dart'; // Make sure to import the animator!
+import '../widgets/fade_animator.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -12,8 +11,6 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-    final name = user?.displayName ?? 'User';
     final colors = Theme.of(context).colorScheme;
 
     return Scaffold(
@@ -24,29 +21,44 @@ class DashboardScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header
+              // Header — uses userChanges() so name updates immediately after register
               FadeInSlide(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                child: StreamBuilder<User?>(
+                  stream: FirebaseAuth.instance.userChanges(),
+                  builder: (context, userSnap) {
+                    final name = userSnap.data?.displayName ??
+                        FirebaseAuth.instance.currentUser?.displayName ??
+                        'User';
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Good ${_greeting()}! 👋',
-                            style: TextStyle(fontSize: 13, color: colors.onSurfaceVariant)),
-                        Text(name,
-                            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: colors.onSurface)),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Good ${_greeting()}! 👋',
+                                style: TextStyle(
+                                    fontSize: 13,
+                                    color: colors.onSurfaceVariant)),
+                            Text(name,
+                                style: TextStyle(
+                                    fontSize: 22,
+                                    fontWeight: FontWeight.bold,
+                                    color: colors.onSurface)),
+                          ],
+                        ),
+                        Container(
+                          width: 44,
+                          height: 44,
+                          decoration: BoxDecoration(
+                            color: colors.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(Icons.notifications_outlined,
+                              color: colors.primary),
+                        ),
                       ],
-                    ),
-                    Container(
-                      width: 44, height: 44,
-                      decoration: BoxDecoration(
-                        color: colors.primaryContainer,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(Icons.notifications_outlined, color: colors.primary),
-                    ),
-                  ],
+                    );
+                  },
                 ),
               ),
 
@@ -73,7 +85,10 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Environment',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colors.onSurface)),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colors.onSurface)),
                     const SizedBox(height: 12),
                     const _EnvironmentCard(),
                   ],
@@ -82,14 +97,17 @@ class DashboardScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Presence status
+              // Presence
               FadeInSlide(
                 delay: const Duration(milliseconds: 300),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Presence',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colors.onSurface)),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colors.onSurface)),
                     const SizedBox(height: 12),
                     const _PresenceCard(),
                   ],
@@ -105,7 +123,10 @@ class DashboardScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text('Active Alerts',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: colors.onSurface)),
+                        style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: colors.onSurface)),
                     const SizedBox(height: 12),
                     const _ActiveAlertsCard(),
                   ],
@@ -133,7 +154,9 @@ BoxDecoration _cardDecoration(BuildContext context, {Color? customColor}) {
     color: customColor ?? Theme.of(context).colorScheme.surface,
     borderRadius: BorderRadius.circular(16),
     border: isDark ? Border.all(color: Colors.white12) : null,
-    boxShadow: isDark ? [] : [
+    boxShadow: isDark
+        ? []
+        : [
       BoxShadow(
         color: Colors.black.withAlpha(10),
         blurRadius: 15,
@@ -152,10 +175,13 @@ class _RoomCountCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users/$uid/rooms').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users/$uid/rooms')
+            .snapshots(),
         builder: (context, snap) {
           final count = snap.data?.docs.length ?? 0;
-          return _statCard(context, 'Rooms', count.toString(), Icons.meeting_room_outlined, Colors.indigo);
+          return _statCard(context, 'Rooms', count.toString(),
+              Icons.meeting_room_outlined, Colors.indigo);
         },
       ),
     );
@@ -171,18 +197,27 @@ class _DeviceCountCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('users/$uid/rooms').snapshots(),
+        stream: FirebaseFirestore.instance
+            .collection('users/$uid/rooms')
+            .snapshots(),
         builder: (context, roomSnap) {
           final rooms = roomSnap.data?.docs ?? [];
-          if (rooms.isEmpty) return _statCard(context, 'Devices', '0', Icons.devices, Colors.teal);
-
+          if (rooms.isEmpty) {
+            return _statCard(
+                context, 'Devices', '0', Icons.devices, Colors.teal);
+          }
           return StreamBuilder<List<QuerySnapshot>>(
             stream: Stream.fromFuture(Future.wait(
-              rooms.map((r) => FirebaseFirestore.instance.collection('users/$uid/rooms/${r.id}/devices').get()),
+              rooms.map((r) => FirebaseFirestore.instance
+                  .collection('users/$uid/rooms/${r.id}/devices')
+                  .get()),
             )),
             builder: (context, devSnap) {
-              final total = devSnap.data?.fold<int>(0, (acc, qs) => acc + qs.docs.length) ?? 0;
-              return _statCard(context, 'Devices', total.toString(), Icons.devices, Colors.teal);
+              final total = devSnap.data
+                  ?.fold<int>(0, (acc, qs) => acc + qs.docs.length) ??
+                  0;
+              return _statCard(context, 'Devices', total.toString(),
+                  Icons.devices, Colors.teal);
             },
           );
         },
@@ -191,7 +226,8 @@ class _DeviceCountCard extends StatelessWidget {
   }
 }
 
-Widget _statCard(BuildContext context, String label, String value, IconData icon, MaterialColor color) {
+Widget _statCard(BuildContext context, String label, String value,
+    IconData icon, MaterialColor color) {
   final isDark = Theme.of(context).brightness == Brightness.dark;
   return Container(
     padding: const EdgeInsets.all(16),
@@ -204,14 +240,23 @@ Widget _statCard(BuildContext context, String label, String value, IconData icon
             color: isDark ? color.withAlpha(51) : color.shade50,
             borderRadius: BorderRadius.circular(10),
           ),
-          child: Icon(icon, color: isDark ? color.shade200 : color.shade600, size: 20),
+          child: Icon(icon,
+              color: isDark ? color.shade200 : color.shade600, size: 20),
         ),
         const SizedBox(width: 10),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onSurface)),
-            Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+            Text(value,
+                style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.onSurface)),
+            Text(label,
+                style: TextStyle(
+                    fontSize: 11,
+                    color:
+                    Theme.of(context).colorScheme.onSurfaceVariant)),
           ],
         ),
       ],
@@ -239,19 +284,30 @@ class _EnvironmentCard extends StatelessWidget {
 
         return Container(
           padding: const EdgeInsets.all(20),
-          decoration: _cardDecoration(context, customColor: isDanger ? (isDark ? Colors.red.withAlpha(51) : Colors.red.shade50) : null),
+          decoration: _cardDecoration(context,
+              customColor: isDanger
+                  ? (isDark
+                  ? Colors.red.withAlpha(51)
+                  : Colors.red.shade50)
+                  : null),
           child: Row(
             children: [
-              _envTile(context, Icons.thermostat, '$temp°C', 'Temp', isDark ? Colors.orange.shade300 : Colors.orange),
+              _envTile(context, Icons.thermostat, '$temp°C', 'Temp',
+                  isDark ? Colors.orange.shade300 : Colors.orange),
               _vDivider(context),
-              _envTile(context, Icons.water_drop_outlined, '$humidity%', 'Humidity', isDark ? Colors.blue.shade300 : Colors.blue),
+              _envTile(context, Icons.water_drop_outlined, '$humidity%',
+                  'Humidity', isDark ? Colors.blue.shade300 : Colors.blue),
               _vDivider(context),
               _envTile(
                 context,
-                isDanger ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+                isDanger
+                    ? Icons.warning_amber_rounded
+                    : Icons.check_circle_outline,
                 isDanger ? 'Danger' : 'Safe',
                 'Gas',
-                isDanger ? (isDark ? Colors.red.shade300 : Colors.red) : (isDark ? Colors.green.shade300 : Colors.green),
+                isDanger
+                    ? (isDark ? Colors.red.shade300 : Colors.red)
+                    : (isDark ? Colors.green.shade300 : Colors.green),
               ),
             ],
           ),
@@ -260,13 +316,21 @@ class _EnvironmentCard extends StatelessWidget {
     );
   }
 
-  Widget _envTile(BuildContext context, IconData icon, String value, String label, Color color) {
+  Widget _envTile(BuildContext context, IconData icon, String value,
+      String label, Color color) {
     return Expanded(
       child: Column(children: [
         Icon(icon, color: color, size: 26),
         const SizedBox(height: 6),
-        Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Theme.of(context).colorScheme.onSurface)),
-        Text(label, style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        Text(value,
+            style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 15,
+                color: Theme.of(context).colorScheme.onSurface)),
+        Text(label,
+            style: TextStyle(
+                fontSize: 11,
+                color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ]),
     );
   }
@@ -287,10 +351,14 @@ class _PresenceCard extends StatelessWidget {
     return StreamBuilder(
       stream: ref.onValue,
       builder: (context, snapshot) {
-        final present = snapshot.data?.snapshot.value as bool? ?? false;
+        final present =
+            snapshot.data?.snapshot.value as bool? ?? false;
 
         Color bgColor = Theme.of(context).colorScheme.surface;
-        if (present) bgColor = isDark ? Colors.teal.withAlpha(38) : Colors.teal.shade50;
+        if (present) {
+          bgColor =
+          isDark ? Colors.teal.withAlpha(38) : Colors.teal.shade50;
+        }
 
         return Container(
           padding: const EdgeInsets.all(16),
@@ -300,12 +368,20 @@ class _PresenceCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: present ? (isDark ? Colors.teal.withAlpha(77) : Colors.teal.shade100) : Theme.of(context).dividerColor,
+                  color: present
+                      ? (isDark
+                      ? Colors.teal.withAlpha(77)
+                      : Colors.teal.shade100)
+                      : Theme.of(context).dividerColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   present ? Icons.person : Icons.person_off_outlined,
-                  color: present ? (isDark ? Colors.tealAccent : Colors.teal.shade700) : Colors.grey,
+                  color: present
+                      ? (isDark
+                      ? Colors.tealAccent
+                      : Colors.teal.shade700)
+                      : Colors.grey,
                   size: 24,
                 ),
               ),
@@ -313,19 +389,36 @@ class _PresenceCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(present ? 'Someone is home' : 'Nobody home',
+                  Text(
+                      present ? 'Someone is home' : 'Nobody home',
                       style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: present ? (isDark ? Colors.tealAccent : Colors.teal.shade700) : Theme.of(context).colorScheme.onSurfaceVariant)),
-                  Text(present ? 'Presence detected by sensor' : 'No presence detected',
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
+                          color: present
+                              ? (isDark
+                              ? Colors.tealAccent
+                              : Colors.teal.shade700)
+                              : Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant)),
+                  Text(
+                      present
+                          ? 'Presence detected by sensor'
+                          : 'No presence detected',
+                      style: TextStyle(
+                          fontSize: 12,
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant)),
                 ],
               ),
               const Spacer(),
               Container(
-                width: 10, height: 10,
+                width: 10,
+                height: 10,
                 decoration: BoxDecoration(
-                  color: present ? Colors.teal : Theme.of(context).dividerColor,
+                  color: present
+                      ? Colors.teal
+                      : Theme.of(context).dividerColor,
                   shape: BoxShape.circle,
                 ),
               ),
@@ -356,44 +449,74 @@ class _ActiveAlertsCard extends StatelessWidget {
 
         final alerts = <Map<String, dynamic>>[];
         if (gas == 'danger') {
-          alerts.add({'icon': Icons.warning_amber_rounded, 'msg': 'Gas level is dangerous!', 'color': Colors.red});
+          alerts.add({
+            'icon': Icons.warning_amber_rounded,
+            'msg': 'Gas level is dangerous!',
+            'color': Colors.red
+          });
         }
         if (temp > 35) {
-          alerts.add({'icon': Icons.thermostat, 'msg': 'Temperature above 35°C', 'color': Colors.orange});
+          alerts.add({
+            'icon': Icons.thermostat,
+            'msg': 'Temperature above 35°C',
+            'color': Colors.orange
+          });
         }
         if (humidity > 80) {
-          alerts.add({'icon': Icons.water_drop, 'msg': 'Humidity above 80%', 'color': Colors.blue});
+          alerts.add({
+            'icon': Icons.water_drop,
+            'msg': 'Humidity above 80%',
+            'color': Colors.blue
+          });
         }
 
         if (alerts.isEmpty) {
           return Container(
             padding: const EdgeInsets.all(16),
-            decoration: _cardDecoration(context, customColor: isDark ? Colors.green.withAlpha(26) : Colors.green.shade50),
+            decoration: _cardDecoration(context,
+                customColor: isDark
+                    ? Colors.green.withAlpha(26)
+                    : Colors.green.shade50),
             child: Row(children: [
-              Icon(Icons.check_circle_outline, color: isDark ? Colors.greenAccent : Colors.green.shade600),
+              Icon(Icons.check_circle_outline,
+                  color: isDark
+                      ? Colors.greenAccent
+                      : Colors.green.shade600),
               const SizedBox(width: 12),
               Text('All systems normal',
-                  style: TextStyle(color: isDark ? Colors.greenAccent : Colors.green.shade700, fontWeight: FontWeight.w500)),
+                  style: TextStyle(
+                      color: isDark
+                          ? Colors.greenAccent
+                          : Colors.green.shade700,
+                      fontWeight: FontWeight.w500)),
             ]),
           );
         }
 
         return Column(
-          children: alerts.map((a) => Container(
+          children: alerts
+              .map((a) => Container(
             margin: const EdgeInsets.only(bottom: 8),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: (a['color'] as Color).withAlpha(isDark ? 51 : 20),
+              color: (a['color'] as Color)
+                  .withAlpha(isDark ? 51 : 20),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: (a['color'] as Color).withAlpha(isDark ? 128 : 77)),
+              border: Border.all(
+                  color: (a['color'] as Color)
+                      .withAlpha(isDark ? 128 : 77)),
             ),
             child: Row(children: [
-              Icon(a['icon'] as IconData, color: a['color'] as Color, size: 20),
+              Icon(a['icon'] as IconData,
+                  color: a['color'] as Color, size: 20),
               const SizedBox(width: 10),
               Text(a['msg'] as String,
-                  style: TextStyle(color: a['color'] as Color, fontWeight: FontWeight.w500)),
+                  style: TextStyle(
+                      color: a['color'] as Color,
+                      fontWeight: FontWeight.w500)),
             ]),
-          )).toList(),
+          ))
+              .toList(),
         );
       },
     );

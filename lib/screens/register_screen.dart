@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
@@ -37,7 +36,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       return;
     }
 
-    // Basic email validation
     if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(_emailCtrl.text.trim())) {
       setState(() => _error = 'Please enter a valid email address.');
       return;
@@ -55,11 +53,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     try {
       await _auth.register(
           _nameCtrl.text.trim(), _emailCtrl.text.trim(), _passCtrl.text);
-      if(mounted) Navigator.pop(context);
+      // Force reload so displayName is available immediately after register
+      await FirebaseAuth.instance.currentUser?.reload();
+      if (mounted) Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       setState(() => _error = _auth.getErrorMessage(e.code));
     } finally {
-      if(mounted) setState(() => _loading = false);
+      if (mounted) setState(() => _loading = false);
     }
   }
 
@@ -126,7 +126,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ? Icons.visibility_off_outlined
                           : Icons.visibility_outlined,
                       color: colors.onSurfaceVariant),
-                  onPressed: () => setState(() => _obscurePass = !_obscurePass),
+                  onPressed: () =>
+                      setState(() => _obscurePass = !_obscurePass),
                 ),
               ),
               const SizedBox(height: 16),
@@ -187,13 +188,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: _loading
                       ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                              color: colors.onPrimary, strokeWidth: 2))
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                          color: colors.onPrimary, strokeWidth: 2))
                       : const Text('Create Account',
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w600)),
+                      style: TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.w600)),
                 ),
               ),
             ],
@@ -223,7 +224,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         prefixIcon: Icon(icon, color: colors.onSurfaceVariant),
         suffixIcon: suffixIcon,
         border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none),
         filled: true,
         fillColor: isDark ? colors.surface : Colors.grey.shade100,
       ),
