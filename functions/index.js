@@ -1,4 +1,3 @@
-
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 
@@ -17,13 +16,6 @@ exports.sendSensorAlerts = functions.database.ref("/users/{userId}/sensors/dht")
       if (!alerts) {
         return null;
       }
-
-      const payload = {
-        notification: {
-          title: "Smart Home Alert!",
-          body: "",
-        },
-      };
 
       let message = "";
       let sendNotification = false;
@@ -47,21 +39,14 @@ exports.sendSensorAlerts = functions.database.ref("/users/{userId}/sensors/dht")
       }
 
       if (sendNotification) {
-        payload.notification.body = message;
-        const tokens = await getDeviceTokens(userId);
-        if (tokens.length > 0) {
-          await admin.messaging().sendToDevice(tokens, payload);
-        }
+        // Instead of sending a notification, write to the database
+        const notificationRef = admin.database().ref(`/users/${userId}/pending_notifications`).push();
+        await notificationRef.set({
+            title: "Smart Home Alert!",
+            body: message,
+            timestamp: admin.database.ServerValue.TIMESTAMP
+        });
       }
 
       return null;
     });
-
-async function getDeviceTokens(userId) {
-  const tokensSnap = await admin.firestore().collection("users").doc(userId).collection("tokens").get();
-  const tokens = [];
-  tokensSnap.forEach((doc) => {
-    tokens.push(doc.id);
-  });
-  return tokens;
-}
