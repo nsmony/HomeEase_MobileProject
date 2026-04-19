@@ -5,13 +5,9 @@ class AuthService {
   final _auth = FirebaseAuth.instance;
   final _db = FirebaseFirestore.instance;
 
-  // Stream — listens to login/logout in real time
   Stream<User?> get authStateChanges => _auth.authStateChanges();
-
-  // Current logged in user
   User? get currentUser => _auth.currentUser;
 
-  // Register
   Future<void> register(String name, String email, String password) async {
     final cred = await _auth.createUserWithEmailAndPassword(
       email: email,
@@ -25,43 +21,42 @@ class AuthService {
     });
   }
 
-  // Login
   Future<void> login(String email, String password) async {
-    await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    await _auth.signInWithEmailAndPassword(email: email, password: password);
   }
 
-  // Logout
   Future<void> logout() async {
     await _auth.signOut();
   }
 
-  // Password reset
   Future<void> resetPassword(String email) async {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  // Update profile
-  Future<void> updateProfile({String? name, String? photoUrl}) async {
+  /// Updates display name in Firebase Auth + Firestore.
+  /// Profile photo is stored as base64 in Firestore (no Storage needed).
+  Future<void> updateProfile({String? name, String? photoBase64}) async {
     final user = _auth.currentUser;
     if (user == null) return;
 
-    if (name != null) {
+    final Map<String, dynamic> firestoreUpdates = {};
+
+    if (name != null && name.isNotEmpty) {
       await user.updateDisplayName(name);
-      await _db.collection('users').doc(user.uid).update({'name': name});
+      firestoreUpdates['name'] = name;
     }
 
-    if (photoUrl != null) {
-      await user.updatePhotoURL(photoUrl);
+    if (photoBase64 != null) {
+      firestoreUpdates['photoBase64'] = photoBase64;
     }
-    
-    // Refresh the user object to reflect changes
+
+    if (firestoreUpdates.isNotEmpty) {
+      await _db.collection('users').doc(user.uid).update(firestoreUpdates);
+    }
+
     await user.reload();
   }
 
-  // Friendly error messages
   String getErrorMessage(String code) {
     switch (code) {
       case 'user-not-found':
