@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
 
+  provider: ^6.1.2
   cupertino_icons: ^1.0.2
   firebase_core: ^2.25.4
   firebase_auth: ^4.17.4
@@ -20,7 +21,6 @@ dependencies:
 #  firebase_messaging: ^14.7.0
   image_picker: ^1.2.1
 #  firebase_storage: ^11.7.7
-  provider: ^6.0.0
 
 dev_dependencies:
   flutter_test:

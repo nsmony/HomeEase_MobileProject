@@ -51,7 +51,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: SafeArea(
         child: uid == null
             ? const Center(child: CircularProgressIndicator())
-        // StreamBuilder on Firestore so UI auto-updates when profile changes
             : StreamBuilder<DocumentSnapshot>(
           stream: FirebaseFirestore.instance
               .collection('users')
@@ -60,8 +59,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           builder: (context, snapshot) {
             final data =
                 snapshot.data?.data() as Map<String, dynamic>? ?? {};
-            final name =
-                data['name'] as String? ?? user?.displayName ?? 'User';
+            final name = data['name'] as String? ??
+                user?.displayName ??
+                'User';
             final email = user?.email ?? '';
             final photoBase64 = data['photoBase64'] as String?;
             final initials = name.isNotEmpty
@@ -83,14 +83,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // Avatar
                   FadeInSlide(
                     child: GestureDetector(
-                      onTap: _uploadingPhoto ? null : _pickAndUploadPhoto,
+                      onTap: _uploadingPhoto
+                          ? null
+                          : _pickAndUploadPhoto,
                       child: Stack(
                         children: [
                           CircleAvatar(
                             radius: 46,
                             backgroundColor: colors.primaryContainer,
                             backgroundImage: photoBase64 != null
-                                ? MemoryImage(base64Decode(photoBase64))
+                                ? MemoryImage(
+                                base64Decode(photoBase64))
                                 : null,
                             child: photoBase64 == null
                                 ? Text(
@@ -129,10 +132,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   color: colors.primary,
                                   shape: BoxShape.circle,
                                   border: Border.all(
-                                      color: colors.surface, width: 2),
+                                      color: colors.surface,
+                                      width: 2),
                                 ),
                                 child: const Icon(Icons.edit,
-                                    size: 16, color: Colors.white),
+                                    size: 16,
+                                    color: Colors.white),
                               ),
                             ),
                         ],
@@ -141,6 +146,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                   const SizedBox(height: 12),
 
+                  // Name + email
                   FadeInSlide(
                     delay: const Duration(milliseconds: 100),
                     child: Column(
@@ -160,6 +166,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                   const SizedBox(height: 32),
 
+                  // Info tiles
                   FadeInSlide(
                     delay: const Duration(milliseconds: 200),
                     child: Column(
@@ -167,8 +174,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _infoTile(context, Icons.person_outline,
                             'Full Name', name),
                         const SizedBox(height: 12),
-                        _infoTile(context, Icons.email_outlined, 'Email',
-                            email),
+                        _infoTile(context, Icons.email_outlined,
+                            'Email', email),
                         const SizedBox(height: 12),
                         _buildThemeSwitcher(
                             context, themeProvider, isDark, colors),
@@ -180,27 +187,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   const Divider(height: 1),
                   const SizedBox(height: 24),
 
+                  // Action buttons
                   FadeInSlide(
                     delay: const Duration(milliseconds: 300),
                     child: Column(
                       children: [
-                        _actionButton(context, "Edit Profile",
-                            Icons.edit_outlined, () {
-                              showEditProfileDialog(context)
-                                  .then((_) => setState(() {}));
-                            }),
+                        _actionButton(
+                          context,
+                          'Edit Profile',
+                          Icons.edit_outlined,
+                              () => showEditProfileDialog(context)
+                              .then((_) => setState(() {})),
+                        ),
                         const SizedBox(height: 12),
                         _actionButton(
-                            context,
-                            "Change Password",
-                            Icons.lock_outline,
-                                () => showChangePasswordDialog(context)),
+                          context,
+                          'Change Password',
+                          Icons.lock_outline,
+                              () => showChangePasswordDialog(context),
+                        ),
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
+                  // Sign out
                   FadeInSlide(
                     delay: const Duration(milliseconds: 400),
                     child: SizedBox(
@@ -212,20 +224,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             color: isDark
                                 ? Colors.red.shade300
                                 : Colors.red),
-                        label: Text('Sign Out',
-                            style: TextStyle(
-                                color: isDark
-                                    ? Colors.red.shade300
-                                    : Colors.red,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600)),
+                        label: Text(
+                          'Sign Out',
+                          style: TextStyle(
+                              color: isDark
+                                  ? Colors.red.shade300
+                                  : Colors.red,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600),
+                        ),
                         style: OutlinedButton.styleFrom(
                           side: BorderSide(
                               color: isDark
                                   ? Colors.red.shade800
                                   : Colors.red.shade200),
                           shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12)),
+                              borderRadius:
+                              BorderRadius.circular(12)),
                         ),
                       ),
                     ),
@@ -242,16 +257,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _actionButton(BuildContext context, String label, IconData icon,
       VoidCallback onPressed) {
     final colors = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return InkWell(
       onTap: onPressed,
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-            color: colors.surface,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-                color: Theme.of(context).dividerColor, width: 0.5)),
+          color: colors.surface,
+          borderRadius: BorderRadius.circular(16),
+          border: isDark ? Border.all(color: Colors.white12) : null,
+          boxShadow: isDark
+              ? []
+              : [
+            BoxShadow(
+                color: Colors.black.withAlpha(8),
+                blurRadius: 10,
+                offset: const Offset(0, 4))
+          ],
+        ),
         child: Row(
           children: [
             Icon(icon, color: colors.primary, size: 24),
@@ -268,8 +292,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _infoTile(
-      BuildContext context, IconData icon, String label, String value) {
+  Widget _infoTile(BuildContext context, IconData icon, String label,
+      String value) {
     final colors = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
@@ -284,7 +308,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           BoxShadow(
               color: Colors.black.withAlpha(8),
               blurRadius: 10,
-              offset: const Offset(0, 4)),
+              offset: const Offset(0, 4))
         ],
       ),
       child: Row(
@@ -318,7 +342,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Widget _buildThemeSwitcher(BuildContext context, ThemeProvider provider,
       bool isDark, ColorScheme colors) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: colors.surface,
         borderRadius: BorderRadius.circular(16),
@@ -344,8 +369,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(width: 14),
           const Text('Theme',
-              style:
-              TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+              style: TextStyle(
+                  fontSize: 15, fontWeight: FontWeight.w600)),
           const Spacer(),
           DropdownButton<ThemeMode>(
             value: provider.themeMode,

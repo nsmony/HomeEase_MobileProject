@@ -33,8 +33,6 @@ class AuthService {
     await _auth.sendPasswordResetEmail(email: email);
   }
 
-  /// Updates display name in Firebase Auth + Firestore.
-  /// Profile photo is stored as base64 in Firestore (no Storage needed).
   Future<void> updateProfile({String? name, String? photoBase64}) async {
     final user = _auth.currentUser;
     if (user == null) return;
@@ -59,20 +57,37 @@ class AuthService {
 
   String getErrorMessage(String code) {
     switch (code) {
+    // ── Login errors ──────────────────────────
       case 'user-not-found':
         return 'No account found for this email.';
       case 'wrong-password':
-        return 'Incorrect password. Try again.';
+        return 'Incorrect password. Please try again.';
+      case 'invalid-password':
+        return 'Incorrect password. Please try again.';
+    // Firebase now uses this instead of wrong-password + user-not-found
+      case 'invalid-credential':
+        return 'Incorrect email or password. Please try again.';
+      case 'user-disabled':
+        return 'This account has been disabled.';
+      case 'too-many-requests':
+        return 'Too many failed attempts. Please try again later.';
+
+    // ── Register errors ───────────────────────
       case 'email-already-in-use':
         return 'An account already exists for this email.';
       case 'invalid-email':
         return 'Please enter a valid email address.';
       case 'weak-password':
         return 'Password must be at least 6 characters.';
-      case 'too-many-requests':
-        return 'Too many attempts. Please try again later.';
+      case 'operation-not-allowed':
+        return 'Email/password sign-in is not enabled.';
+
+    // ── Network errors ────────────────────────
+      case 'network-request-failed':
+        return 'No internet connection. Please check your network.';
+
       default:
-        return 'Something went wrong. Please try again.';
+        return 'Something went wrong ($code). Please try again.';
     }
   }
 }
