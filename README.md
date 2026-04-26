@@ -1,28 +1,22 @@
 # HomeEase Mobile Project
 
-## Project Description
-HomeEase is a mobile application designed to simplify home management tasks such as maintenance scheduling, service management, and organizing household items. It provides users with tools and resources to ensure their home is running smoothly and efficiently.
+## Overview
+HomeEase is a Flutter mobile application designed to provide users with seamless control and monitoring of their smart home devices. The project integrates a Firebase backend, allowing for real-time data sync and management of user interactions.
 
-## Business Model
-HomeEase operates on a subscription-based model, offering users different tiers of service based on their needs. This includes basic access to features in the free tier and premium features in the paid tiers.
+## Features
+- **Flutter Mobile App**: A highly responsive and interactive Flutter application that runs on both Android and iOS platforms.
+- **Firebase Backend**: Utilizes Firebase for user authentication, database storage, and notifications.
+- **IoT Firmware**: Includes firmware to manage various sensors and relays for home automation tasks.
+  - **DHT11 Temperature/Humidity Sensor**: Monitors and reports temperature and humidity levels.
+  - **Gas Sensor**: Detects harmful gas leaks to ensure user safety.
+  - **Ultrasonic Motion Detection**: Monitors for motion and triggers alerts accordingly.
+  - **Relay Control**: Enables the control of electrical appliances remotely or based on sensor readings.
 
-## Functionalities
-- **Task Management**: Users can create, track, and manage home maintenance tasks.
-- **Service Scheduling**: Schedule regular services such as lawn care or plumbing.
-- **Inventory Management**: Keep track of household items and appliances.
-- **Reminders & Notifications**: Get alerts for upcoming tasks and deadlines.
+## Development
+This project is built using Flutter for the frontend and Firebase for the backend. The IoT components are programmed to provide robust performance and reliable feedback to the application.
 
-## Design Considerations
-- **User-Friendly Interface**: Designed for ease of use, ensuring that users can navigate the app effortlessly.
-- **Responsive Design**: The application adjusts seamlessly to various screen sizes and orientations.
-- **Accessibility**: Considerations for users with disabilities have been incorporated, allowing wider access to functionalities.
+## Installation and Setup
+Instructions for setting up the development environment and running the app.
 
-## Technology Stack
-- **Frontend**: React Native
-- **Backend**: Node.js with Express
-- **Database**: MongoDB
-- **Hosting**: Heroku
-- **Authentication**: Firebase Authentication
-
-## Implementation Details
-The development process followed Agile methodologies, with regular sprints for iterative improvements. Continuous integration and deployment were emphasized to ensure a stable release cycle.
+## Conclusion
+HomeEase combines smart home technology with a user-friendly mobile interface to enhance the living experience by providing safety, comfort, and automation.
